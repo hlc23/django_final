@@ -1,3 +1,4 @@
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, redirect
 from .models import User, Todo
 from django.utils import timezone
@@ -60,3 +61,12 @@ def create_todo(request):
         )
         return redirect('/todo/mine/')
     return render(request, 'form.html')
+
+def profile(request: HttpRequest) -> HttpResponse:
+    if not request.session.get('user_id'):
+        return redirect('/login/')
+
+    user_id = request.session['user_id']
+    user = User.objects.get(id=user_id)
+    todos = Todo.objects.filter(owner_id=user_id)
+    return render(request, 'profile.html', {'user': user, 'todo_list': todos})

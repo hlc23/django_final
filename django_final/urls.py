@@ -26,6 +26,6 @@ urlpatterns = [
     path('todo/public/', views.index, name='public_todo'),
     path('todo/mine/', views.my_todo_list, name='my_todo'),
     path('todo/create/', views.create_todo, name='create_todo'),
-    path('profile/', views.index, name='profile_placeholder'),
+    path('profile/', views.profile, name='profile'),
     path('register/', views.register, name='register'),
 ]
