@@ -1,0 +1,20 @@
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="/">To-Do List</a>
+      </div>
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="/">首頁</a></li>
+        <li><a href="/todo/public/">公開清單</a></li>
+        {% if request.session.user_id %}
+          <li><a href="/todo/mine/">我的清單</a></li>
+          <li><a href="/profile/">個人資料</a></li>
+          <li><a href="/logout/">登出</a></li>
+        {% else %}
+          <li><a href="/login/">登入</a></li>
+          <li><a href="{% url 'register' %}">註冊</a>
+        {% endif %}
+      </ul>
+    </div>
+  </nav>
+  

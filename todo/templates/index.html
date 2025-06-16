@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}公開清單{% endblock %}
+{% block content %}
+<div class="container">
+  <h2>公開 Todo 清單</h2>
+  <ul class="list-group">
+    {% for todo in todo_list %}
+      <li class="list-group-item">
+        <strong>{{ todo.content }}</strong><br>
+        新增者：{{ todo.owner }}<br>
+        截止時間：{{ todo.deadline|date:"Y-m-d H:i:s" }}<br>
+        倒數：<span class="countdown" data-deadline="{{ todo.deadline|date:"Y-m-d\\TH:i:s" }}"></span>
+      </li>
+    {% empty %}
+      <li class="list-group-item">目前沒有公開任務</li>
+    {% endfor %}
+  </ul>
+</div>
+
+<script>
+  function updateCountdowns() {
+    const countdowns = document.querySelectorAll('.countdown');
+    countdowns.forEach(function(el) {
+      const deadline = new Date(el.dataset.deadline);
+      const now = new Date();
+      const diff = deadline - now;
+
+      if (diff <= 0) {
+        el.textContent = "已截止";
+      } else {
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        el.textContent = `${hours}時 ${minutes}分 ${seconds}秒`;
+      }
+    });
+  }
+
+  setInterval(updateCountdowns, 1000);
+  updateCountdowns();
+</script>
+{% endblock %}
