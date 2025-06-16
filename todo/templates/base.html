@@ -18,12 +18,30 @@ integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En
 <!-- Latest compiled and minified JavaScript -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" 
 integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+<style>
+    html, body {
+        height: 100%;
+    }
+    
+    body {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .main-content {
+        flex: 1;
+    }
+</style>
+
     {% block head %}{% endblock %}
 </head>
 <body>
     {% include 'partials/header.html' %}
-    <div class="container">
-        {% block content %}{% endblock %}
+    <div class="main-content">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
     </div>
     {% include 'partials/footer.html' %}
     <!-- Bootstrap JS -->

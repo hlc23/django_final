@@ -33,13 +33,13 @@
         </div>
         <div class="col-md-4">
           <div class="text-center">
-            <h4>{{ todo_list|length|add:"-"|add:todo_list|length }}</h4>
+            <h4>{{ done_todos|length }}</h4>
             <p>已完成</p>
           </div>
         </div>
         <div class="col-md-4">
           <div class="text-center">
-            <h4>{{ todo_list|length }}</h4>
+            <h4>{{ running_todos|length }}</h4>
             <p>進行中</p>
           </div>
         </div>

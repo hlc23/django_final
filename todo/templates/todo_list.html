@@ -2,20 +2,74 @@
 {% block title %}我的清單{% endblock %}
 {% block content %}
 <div class="container">
-  <h2>我的 Todo 清單</h2>
-  <a href="/todo/create/" class="btn btn-success">新增任務</a>
-  <ul class="list-group">
-    {% for todo in todo_list %}
-      <li class="list-group-item">
-        <strong>{{ todo.content }}</strong><br>
-        新增者：{{ todo.owner }}<br>
-        截止時間：{{ todo.deadline|date:"Y-m-d H:i:s" }}<br>
-        倒數：<span class="countdown" data-deadline="{{ todo.deadline|date:"Y-m-d\\TH:i:s" }}"></span>
-      </li>
-    {% empty %}
-      <li class="list-group-item">目前沒有待辦事項</li>
-    {% endfor %}
-  </ul>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">
+        <span class="glyphicon glyphicon-list"></span> 我的 Todo 清單
+      </h3>
+      <div class="pull-right" style="margin-top: -20px;">
+        <a href="/todo/create/" class="btn btn-success btn-sm">
+          <span class="glyphicon glyphicon-plus"></span> 新增任務
+        </a>
+      </div>
+      <div class="clearfix"></div>
+    </div>
+    <div class="panel-body">
+      {% if todo_list %}
+        <div class="row">
+          {% for todo in todo_list %}
+            <div class="col-md-4 col-sm-6 col-xs-12" style="margin-bottom: 15px;">
+              <div class="panel {% if todo.done %}panel-success{% else %}panel-info{% endif %}">
+                <div class="panel-heading" style="padding: 8px 15px;">
+                  <h4 class="panel-title" style="font-size: 14px;">
+                    {% if todo.done %}
+                      <span class="glyphicon glyphicon-ok text-success"></span>
+                    {% else %}
+                      <span class="glyphicon glyphicon-time text-warning"></span>
+                    {% endif %}
+                    {{ todo.content|truncatechars:20 }}
+                  </h4>
+                </div>
+                <div class="panel-body" style="padding: 10px;">
+                  <small class="text-muted">
+                    <div><strong>新增者：</strong>{{ todo.owner }}</div>
+                    <div><strong>截止：</strong>{{ todo.deadline|date:"m/d H:i" }}</div>
+                    {% if todo.done %}
+                      <div class="text-success"><strong>完成：</strong>{{ todo.done_at|date:"m/d H:i" }}</div>
+                    {% else %}
+                      <div class="text-warning"><strong>倒數：</strong><span class="countdown" data-deadline="{{ todo.deadline|date:"Y-m-d\\TH:i:s" }}"></span></div>
+                    {% endif %}
+                  </small>
+                </div>
+                <div class="panel-footer" style="padding: 5px 10px; text-align: center;">
+                  {% if not todo.done %}
+                    <form method="post" action="/todo/{{ todo.id }}/done/" style="display: inline-block; margin-right: 5px;">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-success btn-xs">
+                        <span class="glyphicon glyphicon-ok"></span> 完成
+                      </button>
+                    </form>
+                  {% endif %}
+                  <form method="post" action="/todo/{{ todo.id }}/delete/" style="display: inline-block;" onsubmit="return confirm('確定要刪除這個任務嗎？');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-xs">
+                      <span class="glyphicon glyphicon-trash"></span> 刪除
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="text-center text-muted" style="padding: 40px;">
+          <span class="glyphicon glyphicon-inbox" style="font-size: 48px; display: block; margin-bottom: 15px;"></span>
+          <h4>目前沒有待辦事項</h4>
+          <p>點擊上方「新增任務」按鈕來建立第一個任務吧！</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
 </div>
 
 <script>

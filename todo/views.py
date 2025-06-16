@@ -67,6 +67,42 @@ def profile(request: HttpRequest) -> HttpResponse:
         return redirect('/login/')
 
     user_id = request.session['user_id']
-    user = User.objects.get(id=user_id)
     todos = Todo.objects.filter(owner_id=user_id)
-    return render(request, 'profile.html', {'user': user, 'todo_list': todos})
+    datas = {
+        'user': User.objects.get(id=user_id),
+        'todo_list': Todo.objects.filter(owner_id=user_id),
+        'done_todos': todos.filter(owner_id=user_id, done=True),
+        'running_todos': todos.filter(owner_id=user_id, done=False),
+    }
+    return render(request, 'profile.html', datas)
+
+
+def mark_todo_done(request, todo_id):
+    if not request.session.get('user_id'):
+        return redirect('/login/')
+    
+    if request.method == 'POST':
+        try:
+            user_id = request.session['user_id']
+            todo = Todo.objects.get(id=todo_id, owner_id=user_id)
+            todo.done = True
+            todo.done_at = timezone.now()
+            todo.save()
+        except Todo.DoesNotExist:
+            pass  # if todo does not exist or not owned by user, ignore
+    
+    return redirect('/todo/mine/')
+    
+def delete_todo(request, todo_id):
+    if not request.session.get('user_id'):
+        return redirect('/login/')
+    
+    if request.method == 'POST':
+        try:
+            user_id = request.session['user_id']
+            todo = Todo.objects.get(id=todo_id, owner_id=user_id)
+            todo.delete()
+        except Todo.DoesNotExist:
+            pass  # is todo not exist or not owned by user, ignore
+    
+    return redirect('/todo/mine/')

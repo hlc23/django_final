@@ -3,18 +3,34 @@
 {% block content %}
 <div class="container">
   <h2>公開 Todo 清單</h2>
-  <ul class="list-group">
-    {% for todo in todo_list %}
-      <li class="list-group-item">
-        <strong>{{ todo.content }}</strong><br>
-        新增者：{{ todo.owner }}<br>
-        截止時間：{{ todo.deadline|date:"Y-m-d H:i:s" }}<br>
-        倒數：<span class="countdown" data-deadline="{{ todo.deadline|date:"Y-m-d\\TH:i:s" }}"></span>
-      </li>
-    {% empty %}
-      <li class="list-group-item">目前沒有公開任務</li>
-    {% endfor %}
-  </ul>
+  {% if todo_list %}
+    <div class="row">
+      {% for todo in todo_list %}
+        <div class="col-md-4 mb-3">
+          <div class="panel panel-primary">
+            <div class="panel-heading">
+              <h4>{{ todo.owner }}</h4>
+            </div>
+            <div class="panel-body">
+              <p class="card-text">
+                <strong>{{ todo.content }}</strong><br>
+                <small class="text-muted">截止時間：{{ todo.deadline|date:"Y-m-d H:i:s" }}</small>
+              </p>
+            </div>
+            <div class="panel-footer">
+                {% if todo.done %}
+                  <span class="badge bg-success">已完成</span>
+                {% else %}  
+                  倒數：<span class="countdown badge bg-warning text-dark" data-deadline="{{ todo.deadline|date:'Y-m-d\\TH:i:s' }}"></span>
+                {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-info">目前沒有公開任務</div>
+  {% endif %}
 </div>
 
 <script>
