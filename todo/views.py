@@ -22,6 +22,10 @@ def index(request):
     todos = Todo.objects.filter(public=True).order_by('deadline')
     return render(request, 'index.html', {'todo_list': todos})
 
+def public_todo(request):
+    todos = Todo.objects.filter(public=True).order_by('deadline')
+    return render(request, 'public_todo.html', {'todo_list': todos})
+
 def login_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')

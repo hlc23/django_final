@@ -1,58 +1,69 @@
-{% extends "base.html" %}
-{% block title %}公開清單{% endblock %}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}首頁 - ToDo任務平台{% endblock %}
+
 {% block content %}
-<div class="container">
-  <h2>公開 Todo 清單</h2>
-  {% if todo_list %}
-    <div class="row">
-      {% for todo in todo_list %}
-        <div class="col-md-4 mb-3">
-          <div class="panel panel-primary">
-            <div class="panel-heading">
-              <h4>{{ todo.owner }}</h4>
-            </div>
-            <div class="panel-body">
-              <p class="card-text">
-                <strong>{{ todo.content }}</strong><br>
-                <small class="text-muted">截止時間：{{ todo.deadline|date:"Y-m-d H:i:s" }}</small>
-              </p>
-            </div>
-            <div class="panel-footer">
-                {% if todo.done %}
-                  <span class="badge bg-success">已完成</span>
-                {% else %}  
-                  倒數：<span class="countdown badge bg-warning text-dark" data-deadline="{{ todo.deadline|date:'Y-m-d\\TH:i:s' }}"></span>
-                {% endif %}
-            </div>
-          </div>
-        </div>
-      {% endfor %}
-    </div>
+<div class="jumbotron text-center" style="background: linear-gradient(to right, #f8e1f4, #e0ecff); padding: 50px 20px;">
+  <h1 class="display-4">📝 公開任務清單</h1>
+  <p class="lead">瀏覽其他使用者的任務倒數，也可以建立你的待辦清單！</p>
+  {% if user.is_authenticated %}
+    <a href="{% url 'my_todo' %}" class="btn btn-primary btn-lg">前往我的任務</a>
   {% else %}
-    <div class="alert alert-info">目前沒有公開任務</div>
+    <a href="{% url 'login' %}" class="btn btn-success btn-lg">註冊</a>
   {% endif %}
 </div>
 
+<div class="container mt-4">
+  {% if todo_list %}
+  <div class="row">
+    {% for todo in todo_list %}
+      <div class="col-md-4 mb-3">
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h4>{{ todo.owner }}</h4>
+          </div>
+          <div class="panel-body">
+            <p class="card-text">
+              <strong>{{ todo.content }}</strong><br>
+              <small class="text-muted">截止時間：{{ todo.deadline|date:"Y-m-d H:i:s" }}</small>
+            </p>
+          </div>
+          <div class="panel-footer">
+              {% if todo.done %}
+                <span class="badge bg-success">已完成</span>
+              {% else %}  
+                倒數：<span class="countdown badge bg-warning text-dark" data-deadline="{{ todo.deadline|date:'Y-m-d\\TH:i:s' }}"></span>
+              {% endif %}
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="alert alert-info">目前沒有公開任務</div>
+{% endif %}
+</div>
+
 <script>
-  function updateCountdowns() {
-    const countdowns = document.querySelectorAll('.countdown');
-    countdowns.forEach(function(el) {
-      const deadline = new Date(el.dataset.deadline);
-      const now = new Date();
+  // 倒數計時效果
+  const countdowns = document.querySelectorAll('.countdown');
+  countdowns.forEach(el => {
+    const deadline = new Date(el.dataset.deadline).getTime();
+    function updateCountdown() {
+      const now = new Date().getTime();
       const diff = deadline - now;
-
       if (diff <= 0) {
-        el.textContent = "已截止";
-      } else {
-        const hours = Math.floor(diff / (1000 * 60 * 60));
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-        el.textContent = `${hours}時 ${minutes}分 ${seconds}秒`;
+        el.innerText = "已到期";
+        return;
       }
-    });
-  }
-
-  setInterval(updateCountdowns, 1000);
-  updateCountdowns();
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((diff / (1000 * 60)) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+      el.innerText = `${hours} 小時 ${minutes} 分 ${seconds} 秒`;
+    }
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  });
 </script>
 {% endblock %}
