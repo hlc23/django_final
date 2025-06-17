@@ -1,7 +1,9 @@
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
-from .models import User, Todo
 from django.utils import timezone
+from django.contrib import messages
+
+from .models import User, Todo
 from .forms import RegisterForm
 
 def register(request):
@@ -18,40 +20,53 @@ def register(request):
     return render(request, 'register.html', {'form': form})
 
 
-def index(request):
+def index(request: HttpRequest) -> HttpResponse:
     todos = Todo.objects.filter(public=True).order_by('deadline')
+    
+    if request.session.get('username'):
+        messages.success(request, f'歡迎回來！ {request.session["username"]}')
+    
+    
     return render(request, 'index.html', {'todo_list': todos})
 
-def public_todo(request):
+def public_todo(request: HttpRequest) -> HttpResponse:
     todos = Todo.objects.filter(public=True).order_by('deadline')
     return render(request, 'public_todo.html', {'todo_list': todos})
 
-def login_view(request):
+def login_view(request: HttpRequest) -> HttpResponse:
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
+        next_url = request.POST.get('next', '/')
         try:
             user = User.objects.get(username=username, password=password)
             request.session['user_id'] = user.id
-            return redirect('/')
+            request.session['username'] = user.username
+            return redirect(next_url)
         except User.DoesNotExist:
-            return render(request, 'login.html', {'error': '帳號或密碼錯誤'})
-    return render(request, 'login.html')
+            messages.warning(request, '帳號或密碼錯誤')
+            return render(request, 'login.html', {'next': next_url})
 
-def logout_view(request):
+    next_url = request.GET.get('next', '/')
+    return render(request, 'login.html', {'next': next_url})
+
+def logout_view(request: HttpRequest) -> HttpResponse:
     request.session.flush()
+    messages.info(request, '已登出成功!')
     return redirect('/')
 
-def my_todo_list(request):
+def my_todo_list(request: HttpRequest) -> HttpResponse:
     if not request.session.get('user_id'):
-        return redirect('/login/')
+        messages.warning(request, '請先登入')
+        return redirect(f'/login/?next={request.path}')
     user_id = request.session['user_id']
     todos = Todo.objects.filter(owner_id=user_id)
     return render(request, 'todo_list.html', {'todo_list': todos})
 
-def create_todo(request):
+def create_todo(request: HttpRequest) -> HttpResponse:
     if not request.session.get('user_id'):
-        return redirect('/login/')
+        messages.warning(request, '請先登入')
+        return redirect(f'/login/?next={request.path}')
     if request.method == 'POST':
         content = request.POST.get('content')
         deadline = request.POST.get('deadline')
@@ -68,7 +83,8 @@ def create_todo(request):
 
 def profile(request: HttpRequest) -> HttpResponse:
     if not request.session.get('user_id'):
-        return redirect('/login/')
+        messages.warning(request, '請先登入')
+        return redirect(f'/login/?next={request.path}')
 
     user_id = request.session['user_id']
     todos = Todo.objects.filter(owner_id=user_id)
@@ -81,9 +97,10 @@ def profile(request: HttpRequest) -> HttpResponse:
     return render(request, 'profile.html', datas)
 
 
-def mark_todo_done(request, todo_id):
+def mark_todo_done(request: HttpRequest, todo_id: int) -> HttpResponse:
     if not request.session.get('user_id'):
-        return redirect('/login/')
+        messages.warning(request, '請先登入')
+        return redirect(f'/login/?next={request.path}')
     
     if request.method == 'POST':
         try:
@@ -97,9 +114,10 @@ def mark_todo_done(request, todo_id):
     
     return redirect('/todo/mine/')
     
-def delete_todo(request, todo_id):
+def delete_todo(request: HttpRequest, todo_id: int) -> HttpResponse:
     if not request.session.get('user_id'):
-        return redirect('/login/')
+        messages.warning(request, '請先登入')
+        return redirect(f'/login/?next={request.path}')
     
     if request.method == 'POST':
         try:

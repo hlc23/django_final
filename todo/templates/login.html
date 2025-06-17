@@ -3,11 +3,16 @@
 {% block content %}
 <div class="col-md-4 col-md-offset-4">
     <h3>登入</h3>
-    {% if error %}
-        <div class="alert alert-danger">{{ error }}</div>
-    {% endif %}
+
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+
     <form method="POST">
         {% csrf_token %}
+        {% if next %}
+            <input type="hidden" name="next" value="{{ next }}">
+        {% endif %}
         <div class="form-group">
             <label>帳號</label>
             <input type="text" name="username" class="form-control" required>
