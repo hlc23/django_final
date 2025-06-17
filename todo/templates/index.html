@@ -46,24 +46,25 @@
 </div>
 
 <script>
-  // 倒數計時效果
-  const countdowns = document.querySelectorAll('.countdown');
-  countdowns.forEach(el => {
-    const deadline = new Date(el.dataset.deadline).getTime();
-    function updateCountdown() {
-      const now = new Date().getTime();
+  function updateCountdowns() {
+    const countdowns = document.querySelectorAll('.countdown');
+    countdowns.forEach(function(el) {
+      const deadline = new Date(el.dataset.deadline);
+      const now = new Date();
       const diff = deadline - now;
+
       if (diff <= 0) {
-        el.innerText = "已到期";
-        return;
+        el.textContent = "已截止";
+      } else {
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        el.textContent = `${hours}時 ${minutes}分 ${seconds}秒`;
       }
-      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-      const minutes = Math.floor((diff / (1000 * 60)) % 60);
-      const seconds = Math.floor((diff / 1000) % 60);
-      el.innerText = `${hours} 小時 ${minutes} 分 ${seconds} 秒`;
-    }
-    updateCountdown();
-    setInterval(updateCountdown, 1000);
-  });
+    });
+  }
+
+  setInterval(updateCountdowns, 1000);
+  updateCountdowns();
 </script>
 {% endblock %}
