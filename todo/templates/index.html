@@ -16,52 +16,74 @@
 
 <div class="container mt-4">
   {% if todo_list %}
-  <div class="row">
-    {% for todo in todo_list %}
-      <div class="col-md-4 mb-3">
-        <div class="panel panel-primary">
-          <div class="panel-heading">
-            <h4>{{ todo.owner }}</h4>
-          </div>
-          <div class="panel-body">
-            <p class="card-text">
-              <strong>{{ todo.content }}</strong><br>
-              <small class="text-muted">截止時間：{{ todo.deadline|date:"Y-m-d H:i:s" }}</small>
-            </p>
-          </div>
-          <div class="panel-footer">
-              {% if todo.done %}
-                <span class="badge bg-success">已完成</span>
-              {% else %}  
-                倒數：<span class="countdown badge bg-warning text-dark" data-deadline="{{ todo.deadline|date:'Y-m-d\\TH:i:s' }}"></span>
-              {% endif %}
+    <div class="row">
+      {% for todo in todo_list %}
+        <div class="col-md-4 mb-3">
+          <div class="panel panel-primary">
+            <div class="panel-heading">
+              <h4>{{ todo.owner }}</h4>
+            </div>
+            <div class="panel-body">
+              <p class="card-text">
+                <strong>{{ todo.content }}</strong><br>
+                <small class="text-muted">截止時間：{{ todo.deadline|date:"Y-m-d H:i:s" }}</small>
+              </p>
+            </div>
+            <div class="panel-footer">
+                {% if todo.done %}
+                  <span class="badge bg-success">已完成</span>
+                {% else %}  
+                  倒數：<span class="countdown badge bg-warning text-dark" data-deadline="{{ todo.deadline|date:'Y-m-d\\TH:i:s' }}" data-todo-id="{{ todo.id }}"></span>
+                {% endif %}
+            </div>
           </div>
         </div>
-      </div>
-    {% endfor %}
-  </div>
-{% else %}
-  <div class="alert alert-info">目前沒有公開任務</div>
-{% endif %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-info">目前沒有公開任務</div>
+  {% endif %}
 </div>
 
 <script>
-  function updateCountdowns() {
+  async function checkTodoStatus(todoId) {
+    try {
+      const response = await fetch(`/api/todo/${todoId}/status/`);
+      if (response.ok) {
+        const data = await response.json();
+        return data.done;
+      }
+    } catch (error) {
+      console.error('Error checking todo status:', error);
+    }
+    return false;
+  }
+
+  async function updateCountdowns() {
     const countdowns = document.querySelectorAll('.countdown');
-    countdowns.forEach(function(el) {
+    for (const el of countdowns) {
       const deadline = new Date(el.dataset.deadline);
       const now = new Date();
       const diff = deadline - now;
+      const todoId = el.dataset.todoId;
 
       if (diff <= 0) {
-        el.textContent = "已截止";
+        // Check if todo is completed when overdue
+        const isDone = await checkTodoStatus(todoId);
+        if (isDone) {
+          el.className = 'badge bg-success';
+          el.textContent = '已完成';
+        } else {
+          el.className = 'badge bg-danger';
+          el.textContent = '已截止';
+        }
       } else {
         const hours = Math.floor(diff / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((diff % (1000 * 60)) / 1000);
         el.textContent = `${hours}時 ${minutes}分 ${seconds}秒`;
       }
-    });
+    }
   }
 
   setInterval(updateCountdowns, 1000);

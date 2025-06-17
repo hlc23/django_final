@@ -1,4 +1,4 @@
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from .models import User, Todo
 from django.utils import timezone
@@ -110,3 +110,23 @@ def delete_todo(request, todo_id):
             pass  # is todo not exist or not owned by user, ignore
     
     return redirect('/todo/mine/')
+
+def api_todo_status(request: HttpRequest, todo_id: int) -> HttpResponse:
+    try:
+        todo = Todo.objects.get(id=todo_id)
+        
+        if todo.public:
+            return JsonResponse({
+                'id': todo.id,
+                'done': todo.done,
+            })
+        else:
+            if request.session.get('user_id') != todo.owner_id:
+                return HttpResponse(status=403)
+            return JsonResponse({
+                'id': todo.id,
+                'done': todo.done,
+            })
+
+    except Todo.DoesNotExist:
+        return HttpResponse(status=404)
