@@ -33,9 +33,9 @@
                 <div class="panel-body" style="padding: 10px;">
                   <small class="text-muted">
                     <div><strong>新增者：</strong>{{ todo.owner }}</div>
-                    <div><strong>截止：</strong>{{ todo.deadline|date:"m/d H:i" }}</div>
+                    <div><strong>截止：</strong>{{ todo.deadline|date:"Y-m-d H:i:s" }}</div>
                     {% if todo.done %}
-                      <div class="text-success"><strong>完成：</strong>{{ todo.done_at|date:"m/d H:i" }}</div>
+                      <div class="text-success"><strong>完成：</strong>{{ todo.done_at|date:"Y-m-d H:i:s" }}</div>
                     {% else %}
                       <div class="text-warning"><strong>倒數：</strong><span class="countdown" data-deadline="{{ todo.deadline|date:"Y-m-d\\TH:i:s" }}"></span></div>
                     {% endif %}
