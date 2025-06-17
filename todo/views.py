@@ -22,10 +22,10 @@ def register(request):
 
 def index(request: HttpRequest) -> HttpResponse:
     todos = Todo.objects.filter(public=True).order_by('deadline')
+    todos = sorted(todos, key=lambda x: (x.done, x.deadline))
     
     if request.session.get('username'):
         messages.success(request, f'歡迎回來！ {request.session["username"]}')
-    
     
     return render(request, 'index.html', {'todo_list': todos})
 
@@ -61,6 +61,8 @@ def my_todo_list(request: HttpRequest) -> HttpResponse:
         return redirect(f'/login/?next={request.path}')
     user_id = request.session['user_id']
     todos = Todo.objects.filter(owner_id=user_id)
+
+    todos = sorted(todos, key=lambda x: (x.done, x.deadline))
     return render(request, 'todo_list.html', {'todo_list': todos})
 
 def create_todo(request: HttpRequest) -> HttpResponse:
