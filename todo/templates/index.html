@@ -10,7 +10,7 @@
 <div class="jumbotron text-center" style="background: linear-gradient(to right, #f8e1f4, #e0ecff); padding: 50px 20px;">
   <h1 class="display-4">📝 公開任務清單</h1>
   <p class="lead">瀏覽其他使用者的任務倒數，也可以建立你的待辦清單！</p>
-  {% if user.is_authenticated %}
+  {% if request.session.user_id  %}
     <a href="{% url 'my_todo' %}" class="btn btn-primary btn-lg">前往我的任務</a>
   {% else %}
     <a href="{% url 'login' %}" class="btn btn-success btn-lg">註冊</a>
