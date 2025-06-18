@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}公開清單{% endblock %}
 {% block content %}
 <div class="container">
@@ -16,12 +17,24 @@
                 <strong>{{ todo.content }}</strong><br>
                 <small class="text-muted">截止時間：{{ todo.deadline|date:"Y-m-d H:i:s" }}</small>
               </p>
+              <!-- 動態進度條 -->
+              {% if not todo.done %}
+                <div class="progress mb-2" style="height: 8px;">
+                  <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                       role="progressbar" 
+                       style="width: 100%;" 
+                       data-created="{{ todo.created_at|date:'Y-m-d\\TH:i:s' }}"
+                       data-deadline="{{ todo.deadline|date:'Y-m-d\\TH:i:s' }}"
+                       data-todo-id="{{ todo.id }}">
+                  </div>
+                </div>
+              {% endif %}
             </div>
             <div class="panel-footer">
                 {% if todo.done %}
                   <span class="badge bg-success">已完成</span>
                 {% else %}  
-                  倒數：<span class="countdown badge bg-warning text-dark" data-deadline="{{ todo.deadline|date:'Y-m-d\\TH:i:s' }}"></span>
+                  倒數：<span class="countdown badge bg-warning text-dark" data-deadline="{{ todo.deadline|date:'Y-m-d\\TH:i:s' }}" data-todo-id="{{ todo.id }}"></span>
                 {% endif %}
             </div>
           </div>
@@ -33,26 +46,5 @@
   {% endif %}
 </div>
 
-<script>
-  function updateCountdowns() {
-    const countdowns = document.querySelectorAll('.countdown');
-    countdowns.forEach(function(el) {
-      const deadline = new Date(el.dataset.deadline);
-      const now = new Date();
-      const diff = deadline - now;
-
-      if (diff <= 0) {
-        el.textContent = "已截止";
-      } else {
-        const hours = Math.floor(diff / (1000 * 60 * 60));
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-        el.textContent = `${hours}時 ${minutes}分 ${seconds}秒`;
-      }
-    });
-  }
-
-  setInterval(updateCountdowns, 1000);
-  updateCountdowns();
-</script>
+<script src="{% static 'js/todo.js' %}"></script>
 {% endblock %}
