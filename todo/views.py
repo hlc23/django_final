@@ -132,6 +132,33 @@ def delete_todo(request: HttpRequest, todo_id: int) -> HttpResponse:
     
     return redirect('/todo/mine/')
 
+def edit_todo(request: HttpRequest, todo_id: int) -> HttpResponse:
+    if not request.session.get('user_id'):
+        messages.warning(request, '請先登入')
+        return redirect(f'/login/?next={request.path}')
+    
+    user_id = request.session['user_id']
+    try:
+        todo = Todo.objects.get(id=todo_id, owner_id=user_id)
+    except Todo.DoesNotExist:
+        messages.error(request, '找不到該待辦事項')
+        return redirect('/todo/mine/')
+    
+    if request.method == 'POST':
+        content = request.POST.get('content')
+        deadline = request.POST.get('deadline')
+        public = bool(request.POST.get('public'))
+        
+        todo.content = content
+        todo.deadline = deadline
+        todo.public = public
+        todo.save()
+        
+        messages.success(request, '待辦事項已更新')
+        return redirect('/todo/mine/')
+    
+    return render(request, 'edit_todo.html', {'todo': todo})
+
 def api_todo_status(request: HttpRequest, todo_id: int) -> HttpResponse:
     try:
         todo = Todo.objects.get(id=todo_id)

@@ -1,3 +1,6 @@
+// 追蹤已檢查過的過期 todo 項目
+const checkedExpiredTodos = new Set();
+
 async function checkTodoStatus(todoId) {
   try {
     const response = await fetch(`/api/todo/${todoId}/status/`);
@@ -47,9 +50,10 @@ async function updateCountdowns() {
     const todoId = el.dataset.todoId;
 
     if (diff <= 0) {
-      // 檢查是否有 checkTodoStatus 功能（首頁才有）
-      if (todoId && typeof checkTodoStatus === 'function') {
+      // 檢查是否有 checkTodoStatus 功能（首頁才有）且尚未檢查過
+      if (todoId && typeof checkTodoStatus === 'function' && !checkedExpiredTodos.has(todoId)) {
         const isDone = await checkTodoStatus(todoId);
+        checkedExpiredTodos.add(todoId); // 標記為已檢查
         if (isDone) {
           el.className = 'badge bg-success';
           el.textContent = '已完成';
@@ -57,7 +61,7 @@ async function updateCountdowns() {
           el.className = 'badge bg-danger';
           el.textContent = '已截止';
         }
-      } else {
+      } else if (!todoId || typeof checkTodoStatus !== 'function') {
         el.textContent = "已截止";
       }
     } else {
@@ -79,9 +83,10 @@ async function updateCountdowns() {
     const remainingTime = deadline - now;
     
     if (remainingTime <= 0) {
-      // 檢查是否完成（首頁才有此功能）
-      if (todoId && typeof checkTodoStatus === 'function') {
+      // 檢查是否完成（首頁才有此功能）且尚未檢查過
+      if (todoId && typeof checkTodoStatus === 'function' && !checkedExpiredTodos.has(todoId)) {
         const isDone = await checkTodoStatus(todoId);
+        checkedExpiredTodos.add(todoId); // 標記為已檢查
         if (isDone) {
           progressBar.style.width = '100%';
           progressBar.style.backgroundColor = '#28a745';
@@ -92,6 +97,7 @@ async function updateCountdowns() {
           progressBar.className = 'progress-bar';
         }
       } else {
+        // 沒有檢查功能或已檢查過，直接顯示過期狀態
         progressBar.style.width = '0%';
         progressBar.style.backgroundColor = '#dc3545';
         progressBar.className = 'progress-bar';
