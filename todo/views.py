@@ -61,7 +61,7 @@ def my_todo_list(request: HttpRequest) -> HttpResponse:
         messages.warning(request, '請先登入')
         return redirect(f'/login/?next={request.path}')
     user_id = request.session['user_id']
-    todos = Todo.objects.filter(public=True)
+    todos = Todo.objects.filter(owner=request.session['user_id'])
     todos = sorted(todos, key=lambda x: (x.deadline < timezone.now(), x.deadline, x.done))
 
     return render(request, 'todo_list.html', {'todo_list': todos})
